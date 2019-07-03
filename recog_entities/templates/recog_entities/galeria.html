@@ -1,0 +1,249 @@
+{% extends "recog_entities/master.html" %}
+
+{% load static %}
+
+{% block titulo %}
+	GALERIA
+{% endblock %}
+
+{% block style %}
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block contenido %}
+	<ol class="breadcrumb">
+		<li><a href="{% url 'home' %}">Home</a></li>
+		<li class="active">GALERIA</li>
+	</ol>
+	<div class="row">
+		<article class="col-md-7 maincontent">
+			<header class="page-header">
+				<h1 class="page-title text-center">Galeria.</h1>
+				<p class="text-center">La foto tomada corresponde a una especie</p>
+			</header>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="row">
+						{% for f in listafotos %}
+							<div class="col-sm-6">
+							    <div class="ih-item circle effect1"><a href="#">
+							        <div class="spinner"></div>
+							        <div class="img">
+							        	<img src="{{ f.0.url }}" alt="{{ f.0.id_especies }}">
+							        </div>
+							        <div class="info">
+							          <div class="info-back">
+							            <h3>Especie</h3>
+							            <p>{{ f.1.nombre }}</p>
+							            <button type="button" class="btn btn-primary text-center" id="myBtn{{ f.0.id_fotos }}" data-toggle="modal" data-target="#myModal{{ f.0.id_fotos }}"><span class="icon-news"></span>INFO</button>
+							          </div>
+							        </div></a>
+							    </div>
+							</div>
+							<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" id="myModal{{ f.0.id_fotos }}" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+								    <div class="modal-content">
+								    	<div class="modal-header">
+								    		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								    		<h4 class="modal-title text-center" id="myModalLabel">{{f.2.nombre}}</h4>
+								    	</div>
+								    	<div class="modal-body">
+											<div class="row borde3">
+												<div class="col-xs-6">
+												    <div class="thumbnail">
+												    	<a href="/w3images/lights.jpg">
+												    		<img src="{{ f.0.url }}" alt="{{ f.0.id_especies }}" style="width:100%">
+												    	</a>
+												    </div>
+												</div>
+												<div class="col-xs-6">
+													<div class="row negro textblanco">
+														<div class="col-xs-12 text-center">
+									    					<label for="">Codigo del AVE</label>
+									    					<p>{{ f.2.codigo }}</p>
+														</div>
+														<div class="col-xs-12">
+															<div class="row">
+																<div class="col-xs-4">
+											    					<label for="">Amenaza</label>
+											    					{% if f.2.uicn_id_uicn.nombre == "CR" %}
+												                		<p>Peligro crítico</p>
+												                	{% elif f.2.uicn_id_uicn.nombre == "EN" %}
+												                		<p>En Peligro</p>
+												                	{% elif f.2.uicn_id_uicn.nombre == "NT" %}
+												                		<p>Casi Amenazado</p>
+											                		{% elif f.2.uicn_id_uicn.nombre == "VU" %}
+											                			<p>Vulnerable</p>
+												                	{% elif f.2.uicn_id_uicn.nombre == "LC" %}
+												                		<p>Preocupación Menor</p>
+												                	{% elif f.2.uicn_id_uicn.nombre == "-" %}
+												                		<p>NO APLICA</p>
+												                  	{% else %}
+												                  		<p>Datos Insuficientes</p>
+												                  	{% endif %}
+											    				</div>
+																<div class="col-xs-4">
+											    					<label for="">Especie</label>
+											    					<p>{{ f.1.nombre }}</p>
+											    				</div>
+											    				<div class="col-xs-4">
+											    					<label for="">Familia</label>
+											    					<p>{{ f.2.familia_id_familia.nombre }}</p>
+											    				</div>
+															</div>
+														</div>
+														<div class="col-xs-12">
+															<div class="row">
+																<div class="col-xs-6">
+																	<label class="text-center"><strong>Sinonimo</strong></label>
+																	<p class="font-2">{{ f.2.sinonimo|default_if_none:"No Disponible" }}</p>
+																</div>
+																<div class="col-xs-6">
+																	<label class="text-center"><strong>Ecologia</strong></label>
+																	<p class="font-2">{{ f.2.ecologia|upper }}</p>
+																</div>
+															</div>
+														</div>
+													</div>
+													<div class="row">
+														<div class="col-xs-6">
+															<label class="text-center">Año de publiccion</label>
+															<p class="font-2">{{ f.2.anio_publicacion }}</p>
+														</div>
+														<div class="col-xs-6">
+															<label class="text-center">Año de recolección</label>
+															<p class="font-2">{{ f.2.anio_collecion }}</p>
+														</div>
+													</div>
+												</div>
+											</div>
+									  	</div>
+									    <div class="modal-footer">
+									        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								      	</div>
+								    </div>
+								</div>
+							</div>
+						{% endfor %}
+					</div>
+					<div class="pagination text-center text-info font-4 col-xs-12">
+					    <span class="step-links">
+					        {% if paginas.has_previous %}
+					            <a href="?page={{ paginas.previous_page_number }}">Anterior</a>
+					        {% endif %}
+					        <span class="current">
+					            {{ paginas.number }} de {{ paginas.paginator.num_pages }}.
+					        </span>
+					        {% if paginas.has_next %}
+					            <a id="linkpaginas" href="?page={{ paginas.next_page_number }}">Siguiente</a>
+					        {% endif %}
+					    </span>
+					</div>
+				</div>
+			</div>
+		</article>
+		<aside class="col-md-5 sidebar sidebar-right">
+			<div class="row widget">
+				<div class="col-xs-12">
+					<h4 class="text-center">Especies con fotos</h4>
+					<section class="datatablas">
+						<table id="conteofotos" class="display" width="100%">
+					        <thead>
+					            <tr>
+					                <th>Especie</th>
+					                <th>Cantidad Fotos</th>
+					            </tr>
+					        </thead>
+					        <tfoot>
+				                <tr>
+				                    <th>Especie</th>
+					                <th>Cantidad Fotos</th>
+				                </tr>
+				            </tfoot>
+					        <tbody class="searchable">
+					        	{% for e in datosfotos %}
+					        		<tr>
+					                    <td>{{ e.1.nombre }}</td>
+					                    <td>{{ e.2 }}</td>
+					                </tr>
+					        	{% endfor %}
+					        </tbody>
+					    </table>
+					</section>
+				</div>
+			</div>
+			<div class="row widget">
+				<div class="col-xs-12">
+					<div id="semicirculo" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto">
+						
+					</div>
+				</div>
+			</div>
+		</aside>
+	</div>
+{% endblock %}
+
+{% block script %}
+	<!-- GRAFIA semiciruclo -->
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+	<!-- TABLA -->
+	<script type="text/Javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script type="text/Javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+  	<script type="text/javascript">
+	    jQuery(document).ready(function ($) {
+	    	$('#conteofotos').DataTable();
+	    	Highcharts.chart('semicirculo', {
+			    chart: {
+			        plotBackgroundColor: null,
+			        plotBorderWidth: 0,
+			        plotShadow: false
+			    },
+			    title: {
+			        text: 'Cantidad de Especies con fotos',
+			        align: 'center',
+			        verticalAlign: 'top',
+			        y: 40
+			    },
+			    tooltip: {
+			        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+			    },
+			    plotOptions: {
+			        pie: {
+			            dataLabels: {
+			                enabled: true,
+			                distance: -50,
+			                style: {
+			                    fontWeight: 'bold',
+			                    color: 'white'
+			                }
+			            },
+			            startAngle: -90,
+			            endAngle: 90,
+			            center: ['50%', '75%']
+			        }
+			    },
+			    series: [{
+			        type: 'pie',
+			        name: 'Representa',
+			        innerSize: '50%',
+			        data: [
+			        	{% for detalle in datosfotos %}
+					        ['{{ detalle.1.nombre }}', {{ detalle.2 }}],
+			        	{% endfor %}
+			            {
+			                name: 'Proprietary or Undetectable',
+			                y: 0.2,
+			                dataLabels: {
+			                    enabled: false
+			                }
+			            }
+			        ]
+			    }]
+			});
+	    });
+	</script>
+{% endblock %}
+

@@ -1,0 +1,308 @@
+{% extends "recog_entities/master.html" %}
+
+{% load static %}
+
+{% block titulo %}
+	Detalle por provincias
+{% endblock %}
+
+{% block style %}
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block contenido %}
+	<div class="col-xs-12">
+		<div class="row">
+			<div class="col-xs-4">
+				<div id="cuadropaises">
+					<p>Algo va mal... revisar la conexión de internet.</p>
+        			{% for pais in listapais %}
+						'{{ pais.0.nombre }}': {
+							{% for provincia in pais.1 %}
+								'{{provincia.0.nombre}}': {
+									{% for lugares in provincia.1 %}
+										'{{ lugares.0 }}': '{{ lugares.1 }}',
+									{% endfor %}
+								},
+							{% endfor %}
+				        },
+				    {% endfor %}
+				</div>
+			</div>
+			<div class="col-xs-4">
+				<div id="container">
+					<p>Cargando...</p>
+		        </div>
+			</div>
+			<div class="col-xs-4">
+		        <div id="aves">
+		        	<p>Espere un momento...</p>
+		        </div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12">
+		<div class="row">
+			<div class="col-xs-6">
+				<h3 class="col-xs-12 borde text-center">Ecuador</h3>
+				<section class="datatablas table-responsive">
+					<table id="example" class="display" width="100%">
+						<thead>
+			                <tr class="success">
+			                    <th>Codigo de Provincia</th>
+			                    <th>Provincia</th>
+			                    <th>Total de Aves</th>
+			                </tr>
+			            </thead>
+			            <tfoot>
+			            	<tr class="info">
+			                    <th>Codigo de Provincia</th>
+			                    <th>Provincia</th>
+			                    <th>Total de Aves</th>
+			                </tr>
+			            </tfoot>
+			            <tbody class="searchable">
+			            	{% for p in contEc %}
+								<tr>
+									<td>{{p.0}}</td>
+									<td>{{p.1}}</td>
+									<td>{{p.2}}</td>
+								</tr>
+							{% endfor %}
+			            </tbody>
+				    </table>
+				</section>
+			</div>
+			<div class="col-xs-6">
+				<h3 class="col-xs-12 borde text-center">Perú</h3>
+				<section class="datatablas table-responsive">
+					<table id="example2" class="display" width="100%">
+						<thead>
+			                <tr class="active">
+			                    <th>Codigo de Provincia</th>
+			                    <th>Provincia</th>
+			                    <th>Total de Aves</th>
+			                </tr>
+			            </thead>
+			            <tfoot>
+			            	<tr class="warning">
+			                    <th>Codigo de Provincia</th>
+			                    <th>Provincia</th>
+			                    <th>Total de Aves</th>
+			                </tr>
+			            </tfoot>
+			            <tbody class="searchable">
+			            	{% for p in contPe %}
+								<tr>
+									<td>{{p.0}}</td>
+									<td>{{p.1}}</td>
+									<td>{{p.2}}</td>
+								</tr>
+							{% endfor %}
+			            </tbody>
+				    </table>
+				</section>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block script %}
+	<script type="text/Javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/series-label.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<!-- CUADRO PAISES -->
+	<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+	<script src="https://code.highcharts.com/modules/treemap.js"></script>
+
+	<script type="text/javascript">
+	    jQuery(document).ready(function ($) {
+	        console.log('llegando');
+	        console.log('{{listapais}}');
+	        $(document).ready(function() {
+				$('#example').DataTable();
+			});
+			$(document).ready(function() {
+				$('#example2').DataTable();
+			});
+
+			Highcharts.chart('aves', {
+			    chart: {
+			        type: 'column'
+			    },
+			    title: {
+			        text: 'Cantidad de Aves por provincia'
+			    },
+			    yAxis: [{
+			        className: 'highcharts-color-0',
+			        title: {
+			            text: 'Ecuador'
+			        }
+			    }, {
+			        className: 'highcharts-color-1',
+			        opposite: true,
+			        title: {
+			            text: 'Perú'
+			        }
+			    }],
+			    plotOptions: {
+			        column: {
+			            borderRadius: 5
+			        }
+			    },
+			    series: [{
+			        data: [
+			        	{% for e in contEc %}
+							{{ e.2 }},
+						{% endfor %}
+			        ]
+			    }, {
+			        data: [
+			        	{% for p in contPe %}
+							{{ p.2 }},
+						{% endfor %}
+			        ],
+			        yAxis: 1
+			    }]
+			});
+
+			// AMENAZAS
+			Highcharts.chart('container', {
+		        colorAxis: {
+		            minColor: '#FFFFFF',
+		            maxColor: Highcharts.getOptions().colors[0]
+		        },
+		        series: [{
+		            type: 'treemap',
+		            layoutAlgorithm: 'squarified',
+		            data: [
+		              {% for f in datosamenaza %}
+		                {
+		                	{% if f.1 == "CR" %}
+		                		name: 'Peligro crítico',
+		                	{% elif f.1 == "EN" %}
+		                		name: 'En Peligro',
+		                	{% elif f.1 == "NT" %}
+		                		name: 'Casi Amenazado',
+	                		{% elif f.1 == "VU" %}
+		                		name: 'Vulnerable',
+		                	{% elif f.1 == "LC" %}
+		                		name: 'Preocupación Menor',
+		                	{% elif f.1 == "-" %}
+		                  		name: 'N/A',
+		                  	{% else %}
+		                  		name: '{{ f.1|default_if_none:"Datos Insuficientes" }}',
+		                  	{% endif %}
+		                  value: {{ f.2 }},
+		                  colorValue: {{ f.3 }}
+		                },
+		              {% endfor %}
+		            ]
+		        }],
+		        title: {
+		            text: '<b>Aves Amenazadas</b>'
+		        }
+		    });
+
+			//cuadros lugares
+	        var data = {
+		        {% for pais in listapais %}
+					'{{ pais.0.nombre }}': {
+						{% for provincia in pais.1 %}
+							'{{provincia.0.nombre}}': {
+								{% for lugares in provincia.1 %}
+									'{{ lugares.0 }}': '{{ lugares.1 }}',
+								{% endfor %}
+							},
+						{% endfor %}
+			        },
+	        	{% endfor %}
+			},
+		    points = [],
+		    regionP,
+		    regionVal,
+		    regionI = 0,
+		    countryP,
+		    countryI,
+		    causeP,
+		    causeI,
+		    region,
+		    country,
+		    cause,
+		    causeName = {
+		        'Communicable & other Group I': 'Communicable diseases',
+		        'Noncommunicable diseases': 'Non-communicable diseases',
+		        'Injuries': 'Injuries'
+		    };
+
+			for (region in data) {
+			    if (data.hasOwnProperty(region)) {
+			        regionVal = 0;
+			        regionP = {
+			            id: 'id_' + regionI,
+			            name: region,
+			            color: Highcharts.getOptions().colors[regionI]
+			        };
+			        countryI = 0;
+			        for (country in data[region]) {
+			            if (data[region].hasOwnProperty(country)) {
+			                countryP = {
+			                    id: regionP.id + '_' + countryI,
+			                    name: country,
+			                    parent: regionP.id
+			                };
+			                points.push(countryP);
+			                causeI = 0;
+			                for (cause in data[region][country]) {
+			                    if (data[region][country].hasOwnProperty(cause)) {
+			                        causeP = {
+			                            id: countryP.id + '_' + causeI,
+			                            name: causeName[cause],
+			                            parent: countryP.id,
+			                            value: Math.round(+data[region][country][cause])
+			                        };
+			                        regionVal += causeP.value;
+			                        points.push(causeP);
+			                        causeI = causeI + 1;
+			                    }
+			                }
+			                countryI = countryI + 1;
+			            }
+			        }
+			        regionP.value = Math.round(regionVal / countryI);
+			        points.push(regionP);
+			        regionI = regionI + 1;
+			    }
+			}
+			Highcharts.chart('cuadropaises', {
+			    series: [{
+			        type: 'treemap',
+			        layoutAlgorithm: 'squarified',
+			        allowDrillToNode: true,
+			        animationLimit: 1000,
+			        dataLabels: {
+			            enabled: false
+			        },
+			        levelIsConstant: false,
+			        levels: [{
+			            level: 1,
+			            dataLabels: {
+			                enabled: true
+			            },
+			            borderWidth: 3
+			        }],
+			        data: points
+			    }],
+			    subtitle: {
+			        text: 'Clic para ver detalle.'
+			    },
+			    title: {
+			        text: 'Visualización detallada.'
+			    }
+			});
+
+		});
+	</script>
+{% endblock %}

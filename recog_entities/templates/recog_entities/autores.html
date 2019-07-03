@@ -1,0 +1,365 @@
+{% extends "recog_entities/master.html" %}
+
+{% load static %}
+
+{% block titulo %}
+	Autores
+{% endblock %}
+
+{% block style %}
+	<link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+{% endblock %}
+{% block contenido %}
+	<!-- container -->
+		<ol class="breadcrumb">
+			<li><a href="{% url 'recog_entities/home' %}">INICIO</a></li>
+			<li class="active">AUTORES</li>
+		</ol>
+		<div class="row">
+			<!-- Sidebar -->
+			<aside class="col-md-4 sidebar sidebar-left">
+				<div class="row widget">
+					<div class="col-xs-12">
+						<div id="cambioAutores">
+							<p>Espere...</p>
+						</div>
+					</div>
+					<div class="col-xs-12">
+						<button class="btn btn-default col-xs-4 text-center" id="plain">Vertical</button>
+						<button class="btn btn-info col-xs-4 text-center" id="inverted">Horizontal</button>
+						<button class="btn btn-warning col-xs-4 text-center" id="polar">Polar</button>
+					</div>
+				</div>
+				<div class="row widget">
+					<div class="col-xs-12">
+						<div id="fuenteautores">
+							<p>
+								<br><b>CR</b> => Peligro crítico <br><br>
+				                <b>EN</b> => En Peligro <br><br>
+				                <b>VU</b> =>Vulnerable <br><br>
+				                <b>NT</b> =>Casi Amenazado <br><br>
+				                <b>LC</b> =>Preocupación Menor <br><br>
+				                <b>DD</b> =>Datos Insuficientes
+		              		</p>
+						</div>
+		            </div>
+				</div>
+				<div class="row widget">
+					<div class="col-xs-12">
+						<div id="chartdiv"></div>
+					</div>
+				</div>
+
+			</aside>
+			<!-- /Sidebar -->
+
+			<!-- Article main content -->
+			<article class="col-md-8 maincontent">
+				<header class="page-header">
+					<h1 class="page-title text-center">AUTORES</h1>
+					<p class="text-center">Detalle del autor y el ave estudiada por el mismo.</p>
+				</header>
+				<div class="row">
+					<section class="datatablas">
+						<table id="tablautor" class="display" width="100%">
+					        <thead>
+					            <tr>
+					                <th>Autor</th>
+					                <th>Observación</th>
+					                <th>Codigo del AVE</th>
+					                <th>Nombre del AVE</th>
+					                <th>Migracion</th>
+					                <th>Familia</th>
+					                <th>Aves estudiadas</th>
+					            </tr>
+					        </thead>
+					        <tfoot>
+					                <tr>
+					                    <th>Autor</th>
+						                <th>Observación</th>
+						                <th>Codigo del AVE</th>
+						                <th>Nombre del AVE</th>
+						                <th>Migracion</th>
+						                <th>Familia</th>
+						                <th>Aves estudiadas</th>
+					                </tr>
+					            </tfoot>
+					        <tbody class="searchable">
+					            {% for estudio in listaestudios %}
+					                <tr>
+					                    <td>{{ estudio.0.nombre }}</td>
+					                    <td>{{ estudio.0.bibliografia|slice:"0:30" }}</td>
+					                    <td>{{ estudio.1.codigo }}</td>
+					                    <td>{{ estudio.1.nombre }}</td>
+					                    <td>{{ estudio.1.migracion|default_if_none:"N/A" }}</td>
+					                    <td>{{ estudio.1.familia_id_familia.nombre }}</td>
+					                    <td>{{ estudio.2 }}</td>
+					                </tr>
+					            {% endfor %}
+					        </tbody>
+					    </table>
+					</section>
+				</div>
+			</article>
+			<!-- /Article -->
+		</div>
+{% endblock %}
+
+{% block script %}
+	<!-- GRAFIca FUENTEs -->
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+
+
+	<!-- TABLA AUTORES y su aves de estudio -->
+	<script type="text/Javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script type="text/Javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+
+
+	<!-- GRAFICA de botones -->
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+	<script type="text/javascript">
+	    jQuery(document).ready(function ($) {
+	    	$('#tablautor').DataTable();
+	    	
+	    	// GRAFIACA FUENTES
+			function renderIcons() {
+			    // Move icon
+			    if (!this.series[0].icon) {
+			        this.series[0].icon = this.renderer.path(['M', -8, 0, 'L', 8, 0, 'M', 0, -8, 'L', 8, 0, 0, 8])
+			            .attr({
+			                'stroke': '#303030',
+			                'stroke-linecap': 'round',
+			                'stroke-linejoin': 'round',
+			                'stroke-width': 2,
+			                'zIndex': 10
+			            })
+			            .add(this.series[2].group);
+			    }
+			    this.series[0].icon.translate(
+			        this.chartWidth / 2 - 10,
+			        this.plotHeight / 2 - this.series[0].points[0].shapeArgs.innerR -
+			            (this.series[0].points[0].shapeArgs.r - this.series[0].points[0].shapeArgs.innerR) / 2
+			    );
+
+			    // Exercise icon
+			    if (!this.series[1].icon) {
+			        this.series[1].icon = this.renderer.path(
+			            ['M', -8, 0, 'L', 8, 0, 'M', 0, -8, 'L', 8, 0, 0, 8,
+			                'M', 8, -8, 'L', 16, 0, 8, 8]
+			            )
+			            .attr({
+			                'stroke': '#ffffff',
+			                'stroke-linecap': 'round',
+			                'stroke-linejoin': 'round',
+			                'stroke-width': 2,
+			                'zIndex': 10
+			            })
+			            .add(this.series[2].group);
+			    }
+			    this.series[1].icon.translate(
+			        this.chartWidth / 2 - 10,
+			        this.plotHeight / 2 - this.series[1].points[0].shapeArgs.innerR -
+			            (this.series[1].points[0].shapeArgs.r - this.series[1].points[0].shapeArgs.innerR) / 2
+			    );
+
+			    // Stand icon
+			    if (!this.series[2].icon) {
+			        this.series[2].icon = this.renderer.path(['M', 0, 8, 'L', 0, -8, 'M', -8, 0, 'L', 0, -8, 8, 0])
+			            .attr({
+			                'stroke': '#303030',
+			                'stroke-linecap': 'round',
+			                'stroke-linejoin': 'round',
+			                'stroke-width': 2,
+			                'zIndex': 10
+			            })
+			            .add(this.series[2].group);
+			    }
+
+			    this.series[2].icon.translate(
+			        this.chartWidth / 2 - 10,
+			        this.plotHeight / 2 - this.series[2].points[0].shapeArgs.innerR -
+			            (this.series[2].points[0].shapeArgs.r - this.series[2].points[0].shapeArgs.innerR) / 2
+			    );
+			}
+
+			Highcharts.chart('fuenteautores', {
+
+			    chart: {
+			        type: 'solidgauge',
+			        height: '110%',
+			        events: {
+			            render: renderIcons
+			        }
+			    },
+
+			    title: {
+			        text: 'Fuentes mas importantes.',
+			        style: {
+			            fontSize: '24px'
+			        }
+			    },
+
+			    tooltip: {
+			        borderWidth: 0,
+			        backgroundColor: 'none',
+			        shadow: false,
+			        style: {
+			            fontSize: '16px'
+			        },
+			        pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}%</span>',
+			        positioner: function (labelWidth) {
+			            return {
+			                x: (this.chart.chartWidth - labelWidth) / 2,
+			                y: (this.chart.plotHeight / 2) + 15
+			            };
+			        }
+			    },
+
+			    pane: {
+			        startAngle: 0,
+			        endAngle: 360,
+			        background: [{ // Track for Move
+			            outerRadius: '112%',
+			            innerRadius: '88%',
+			            backgroundColor: Highcharts.Color(Highcharts.getOptions().colors[0])
+			                .setOpacity(0.3)
+			                .get(),
+			            borderWidth: 0
+			        }, { // Track for Exercise
+			            outerRadius: '87%',
+			            innerRadius: '63%',
+			            backgroundColor: Highcharts.Color(Highcharts.getOptions().colors[1])
+			                .setOpacity(0.3)
+			                .get(),
+			            borderWidth: 0
+			        }, { // Track for Stand
+			            outerRadius: '62%',
+			            innerRadius: '38%',
+			            backgroundColor: Highcharts.Color(Highcharts.getOptions().colors[2])
+			                .setOpacity(0.3)
+			                .get(),
+			            borderWidth: 0
+			        }]
+			    },
+
+			    yAxis: {
+			        min: 0,
+			        max: 100,
+			        lineWidth: 0,
+			        tickPositions: []
+			    },
+
+			    plotOptions: {
+			        solidgauge: {
+			            dataLabels: {
+			                enabled: false
+			            },
+			            linecap: 'round',
+			            stickyTracking: false,
+			            rounded: true
+			        }
+			    },
+
+			    series: [{
+			        name: '{{ uno }}',
+			        data: [{
+			            color: Highcharts.getOptions().colors[0],
+			            radius: '112%',
+			            innerRadius: '88%',
+			            y: {{ valorA }}
+			        }]
+			    }, {
+			        name: '{{ dos }}',
+			        data: [{
+			            color: Highcharts.getOptions().colors[1],
+			            radius: '87%',
+			            innerRadius: '63%',
+			            y: {{ valorB }}
+			        }]
+			    }, {
+			        name: '{{ tres }}',
+			        data: [{
+			            color: Highcharts.getOptions().colors[2],
+			            radius: '62%',
+			            innerRadius: '38%',
+			            y: {{ valorC }}
+			        }]
+			    }]
+			});
+
+
+			// CAMBIO AUTORES
+			var chart = Highcharts.chart('cambioAutores', {
+			    title: {
+			        text: 'Cantidad de Aves Estudias'
+			    },
+
+			    subtitle: {
+			        text: 'Vertical'
+			    },
+
+			    xAxis: {
+			        categories: [
+			        	{% for estudio in listaestudios %}
+			                '{{ estudio.0.nombre }}',
+			            {% endfor %}
+			        ]
+			    },
+
+			    series: [{
+			        type: 'column',
+			        colorByPoint: true,
+			        data: [
+			        	{% for estudio in listaestudios %}
+			                {{ estudio.2 }},
+			            {% endfor %}
+			        ],
+			        showInLegend: false
+			    }]
+
+			});
+
+
+			$('#plain').click(function () {
+			    chart.update({
+			        chart: {
+			            inverted: false,
+			            polar: false
+			        },
+			        subtitle: {
+			            text: 'Vertical'
+			        }
+			    });
+			});
+
+			$('#inverted').click(function () {
+			    chart.update({
+			        chart: {
+			            inverted: true,
+			            polar: false
+			        },
+			        subtitle: {
+			            text: 'Horizontal'
+			        }
+			    });
+			});
+
+			$('#polar').click(function () {
+			    chart.update({
+			        chart: {
+			            inverted: false,
+			            polar: true
+			        },
+			        subtitle: {
+			            text: 'Polar'
+			        }
+			    });
+			});
+	    });
+	</script>
+{% endblock %}
+

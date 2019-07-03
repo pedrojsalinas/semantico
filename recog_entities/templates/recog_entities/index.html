@@ -1,0 +1,108 @@
+{% extends "recog_entities/master.html" %}
+
+{% load static %}
+
+{% block titulo %}
+{{ titulo }}
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block contenido %}
+
+<form method="post">
+	{% csrf_token %}
+	<div class="form-group">
+		{{ form.as_p }}
+	</div>
+	<button type="submit" name="button" id="boton" class="btn btn-primary">Buscar</button>
+</form>
+
+<hr>
+
+<div class="row">
+	<h2 class="text-center">TEXTO PLANO</h2>
+	<div class="col-xs-12 gris textnegro font-peque text-justify">
+		<section>
+			<p id="textoPlano">{{ textoInicial }}</p>
+		</section>
+	</div>
+</div>
+<hr>
+
+<div class="row">
+	<h2 class="text-center">TEXTO TRANSFORMADO</h2>
+	<div class="col-xs-12 blanco textnegro font-peque text-justify">
+		<section>
+			<p>ENTIDADES</p>
+		</section>
+	</div>
+</div>
+<hr>
+
+<!-- Intro -->
+<div class="row">
+	<!-- /Intro-->
+	<div class="col-xs-12 blanco textnegro">
+		<div class="row">
+			<div class="col-xs-12">
+				<h3 class="text-center">Lectura de <b>DATOS</b> del <b>RDF</b></h3>
+				<p>Visualización de los Datos recolectados del RDF.</p>
+			</div>
+			<div class="col-xs-12">
+				<section class="datatablas">
+					<table id="example" class="display" width="100%">
+						<thead>
+							<tr class="success">
+								<th>Sujeto</th>
+								<th>Predicado</th>
+								<th>Objeto</th>
+							</tr>
+						</thead>
+						<tfoot>
+							<tr class="info">
+								<th>Sujeto</th>
+								<th>Predicado</th>
+								<th>Objeto</th>
+							</tr>
+						</tfoot>
+						<tbody class="searchable">
+							{% for tripletas in datos %}
+							<tr>
+								{% for tripleta in tripletas %}
+								<td>{{ tripleta }}</td>
+								{% endfor %}
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</section>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 textblanco">
+		<div class="row">
+			<div id="palabras"></div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/Javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script type="text/Javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/wordcloud.js"></script>
+
+
+<script type="text/javascript">
+	$("#buscarbtn").click(function () {
+	//saco el valor accediendo a un input de tipo text y name = nombre2 y lo asigno a uno con name = nombre3 
+	$("#textoPlano").val($("#textarea").val());
+	});
+	
+</script>
+{% endblock %}
